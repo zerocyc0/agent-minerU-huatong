@@ -1,0 +1,4 @@
+flask>=3.0
+pymysql>=1.1
+websocket-client>=1.7
+werkzeug>=3.0

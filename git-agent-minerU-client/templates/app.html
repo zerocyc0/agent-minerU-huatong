@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>华通物料智能分析平台</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="layout">
+  <!-- ============ 侧栏 ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <div class="brand-text">华通物料智能分析<small>MATERIAL ANALYSIS</small></div>
+    </div>
+
+    <div class="nav-section">功能菜单</div>
+    <nav class="nav" id="nav">
+      <a class="nav-item active" data-view="analysis" data-title="文件分析">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg><span>文件分析</span>
+      </a>
+      <a class="nav-item" data-view="query" data-title="分析结果数据查询">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/><path d="M2 20h20"/>
+        </svg><span>数据查询</span>
+      </a>
+      <a class="nav-item admin-only hidden" data-view="users" data-title="用户管理">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg><span>用户管理</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="user-chip">
+        <div class="avatar" id="avatarText">-</div>
+        <div class="user-meta">
+          <div class="user-name" id="sbUserName">-</div>
+          <div class="user-sub" id="sbUserSub">-</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="btnLogout">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg><span>退出登录</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ 主区 ============ -->
+  <main class="main">
+    <header class="topbar">
+      <h1 id="pageTitle">文件分析</h1>
+      <div class="topbar-right"><span class="dot"></span><span id="topDate"></span></div>
+    </header>
+
+    <div class="content">
+
+      <!-- ======== 视图1: 文件分析 ======== -->
+      <section id="view-analysis" class="view active">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">文件上传分析</div>
+            <div class="card-sub">文件给智能解析，解析结果自动写入并返回解析结果</div>
+          </div>
+          <div class="dropzone" id="dropZone">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <div class="dz-text">点击选择或拖拽文件到此处</div>
+            <div class="dz-hint">支持 PDF / Word / 图片等格式，可多文件上传，单次总量不超过 90MB</div>
+          </div>
+          <input type="file" id="fileInput" multiple hidden>
+          <div class="chips" id="fileChips"></div>
+          <div class="analysis-actions">
+            <input class="input grow" id="questionInput" placeholder="文件分析补充（可选），例如：请重点提取电缆型号、规格与数量">
+            <button class="btn btn-primary" id="btnAnalyze">开始分析</button>
+          </div>
+          <div class="progress-box hidden" id="progressBox">
+            <span class="spinner"></span>
+            <span id="progressText">正在分析中，文件较多时请耐心等待…</span>
+            <span class="muted" id="progressElapsed"></span>
+          </div>
+        </div>
+
+        <div id="resultArea"></div>
+
+        <div class="save-bar hidden" id="saveBar">
+          <span class="save-info" id="saveInfo"></span>
+          <button class="btn btn-primary" id="btnSave">保存到数据库</button>
+        </div>
+      </section>
+
+      <!-- ======== 视图2: 数据查询 ======== -->
+      <section id="view-query" class="view">
+        <div class="card">
+          <div class="filter-bar">
+            <div class="field">
+              <label>开始日期</label>
+              <input type="date" class="input" id="qStart">
+            </div>
+            <div class="field">
+              <label>结束日期</label>
+              <input type="date" class="input" id="qEnd">
+            </div>
+            <div class="field">
+              <label>数据表</label>
+              <select class="input" id="qTable">
+                <option value="material_analysis">原始数据</option>
+                <option value="material_analysis_last">修订后数据</option>
+              </select>
+            </div>
+            <div class="field admin-only hidden" id="qStaffField">
+              <label>员工工号（留空查全部）</label>
+              <input class="input" id="qStaff" placeholder="全部用户" style="width:130px">
+            </div>
+            <button class="btn btn-primary" id="btnQuery">查 询</button>
+          </div>
+        </div>
+
+        <div class="stat-grid" id="statGrid"></div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">条数分布</div></div>
+          <div class="chart-box"><div class="chart" id="chart"></div></div>
+          <div class="chart-legend"><span id="chartLeft"></span><span id="chartRight"></span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head row-between">
+            <div class="card-title">明细数据</div>
+            <span class="muted" id="qCount"></span>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr>
+                <th>文件编号</th><th>数据序号</th><th>文件名</th><th>型号</th><th>规格</th><th>电压</th><th>颜色</th>
+                <th>标准</th><th>数量</th><th>单位</th><th>建立时间</th><th>修改时间</th><th>工号</th>
+              </tr></thead>
+              <tbody id="queryTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======== 视图3: 用户管理 ======== -->
+      <section id="view-users" class="view">
+        <div class="card">
+          <div class="card-head row-between">
+            <div>
+              <div class="card-title">用户管理</div>
+              <div class="card-sub">为员工开通或收回功能菜单权限，员工工号为账号（主键）</div>
+            </div>
+            <button class="btn btn-primary" id="btnAddUser">+ 新增用户</button>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr>
+                <th>员工工号</th><th>用户名</th><th>姓名</th><th>角色</th>
+                <th>文件分析</th><th>数据查询</th><th>状态</th><th>创建时间</th><th>操作</th>
+              </tr></thead>
+              <tbody id="usersTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- Toast 容器 -->
+<div class="toasts" id="toasts"></div>
+
+<!-- 新增用户弹窗 -->
+<div class="modal-mask hidden" id="modalMask">
+  <div class="modal">
+    <div class="modal-title">新增用户</div>
+    <div class="form-item">
+      <label>员工工号（主键）</label>
+      <input class="input" id="nuStaffId" placeholder="例如：HT0001">
+    </div>
+    <div class="form-item">
+      <label>用户名</label>
+      <input class="input" id="nuUsername" placeholder="登录用户名">
+    </div>
+    <div class="form-item">
+      <label>姓名</label>
+      <input class="input" id="nuRealName" placeholder="真实姓名">
+    </div>
+    <div class="form-item">
+      <label>初始密码（至少 6 位）</label>
+      <input class="input" id="nuPassword" type="password" placeholder="初始密码">
+    </div>
+    <div class="form-item">
+      <label>角色</label>
+      <select class="input" id="nuRole" style="width:100%">
+        <option value="employee">普通员工（需授权菜单）</option>
+        <option value="admin">管理员（全部权限）</option>
+      </select>
+    </div>
+    <div class="form-item" id="nuPermBox">
+      <label>功能授权</label>
+      <div style="display:flex; gap:26px; padding-top:4px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="nuPermAnalysis"> 文件分析
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="nuPermQuery"> 数据查询
+        </label>
+      </div>
+    </div>
+    <div class="form-err" id="nuErr"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="nuCancel">取 消</button>
+      <button class="btn btn-primary" id="nuOk">保 存</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
